@@ -166,10 +166,13 @@ and do never "stop". They will be in "waiting" state when they needs whatever
 resources or await triggering by an event.
 
 - Limitations:
+
+```
 256 tasks per system
 256 application timers per system
 8 resources per system
 8 events per task
+```
 
 ## Application
 
