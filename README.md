@@ -54,6 +54,7 @@ implementation that no one needs or wants :)
 
 The "Tetris Machine" is a simple device consisting of:
 
+```
 1 x Atmel (Microchip) ATmega328P microcontroller - PDIP package
 1 x Sparkfun Graphic LCD 84x48 - Nokia 5110
 1 x 100K ohm potentiometer
@@ -63,6 +64,7 @@ The "Tetris Machine" is a simple device consisting of:
 3 x 200 ohm resistor
 1 x 10K ohm resistor
 2 x push button
+```
 
 The value of the resistors is not critical, you can use anything reasonable you
 have at hand. High values will reduce LEDs brightness too much, a too low value
