@@ -225,8 +225,10 @@ E### ## #|
 F  ###  #|
 ----------
 ```
+
 This translates to the binary values:
 
+```
 Board[0x0] = 0b00000000;
 Board[0x1] = 0b00000000;
 Board[0x2] = 0b00010000;
@@ -238,6 +240,7 @@ Board[0xC] = 0b00000001;
 Board[0xD] = 0b01111001;
 Board[0xE] = 0b11101101;
 Board[0xF] = 0b00111001;
+```
 
 Which can be written more compact as:
 
