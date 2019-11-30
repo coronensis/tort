@@ -5,11 +5,11 @@
 This project started out with the intention to implement a simple RTOS
 based on OSEK/VXD for the ATmega328P to be run in a simulator. It ended
 up with a hardware device being able to play Tetris: The "**Tetris Machine**".
-An RTOS was also implemented, although very different from what was
+An RTOS was implemented, although very different from what was
 originally intended :)
 
 On the hardware side the project consists of a device based on the ATmega328P
-microcontroller (which is also powering Arduino Uno boards), a monochrome
+microcontroller (which is powering Arduino Uno boards), a monochrome
 LCD display, a couple of LEDs, buttons and a potentiometer.
 The hardware was put together on a breadboard and is doomed to exist only until
 I need some of its components for other projects. It is trivial to build,
@@ -85,12 +85,12 @@ wiring pretty much resembles a bird's nest. I'm sure you can do better.
 
 Please note that although the Raspberry Pi and the breadboard are optional this
 project assumes that they are used. If you wish to use something different you
-will have to come up with your own hardware setup and also a method to flash the
+will have to come up with your own hardware setup and a method to flash the
 firmware to the microcontroller.
 
 In case you choose to use a Raspberry Pi (Highly recommended as you get for very
 little money a quite capable development machine that can run the avr-gcc
-compiler and do a lot of other useful things. Also very interesting if you only
+compiler and do a lot of other useful things. Very interesting if you only
 have a Windows system but wish to play around with an inexpensive Linux system)
 enable the SPI and UART interfaces on the Raspberry Pi using raspi-config.
 
@@ -124,7 +124,7 @@ time.
 Non-preemptible tasks or mixed scheduling can be simulated.
 
 - Interrupts have higher priority than any task.
-Interrupts on the ATmega328P also have different priorities but they are not
+Interrupts on the ATmega328P have different priorities but they are not
 considered. Interrupt nesting is not supported
 
 - Interrupts do **context saving**. So you can do (almost) anything you could do
@@ -376,7 +376,7 @@ and has the significant additional benefit that you can debug using the avr-gdb.
 
 ## Emulator
 
-To make my life easier I also implemented an emulator for the system that uses
+To make my life easier I implemented an emulator for the system that uses
 POSIX threads, mutexes and condition variables to mimic the tasks, resources
 and events in the RTOS as well as the X11 system for the LCD display.
 It is just way more comfortable to develop the algorithms and debug the graphics

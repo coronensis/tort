@@ -100,7 +100,7 @@ ISR(ADC_vect, ISR_NAKED)
 }
 
 /* This is the Timer1 overflow ISR that is driving the OS scheduler.
- * It is also abused to report key presses */
+ * It is abused to report key presses */
 ISR(TIMER1_OVF_vect, ISR_NAKED)
 {
 	/* Save the context of the current task */
@@ -135,7 +135,7 @@ ISR(TIMER1_OVF_vect, ISR_NAKED)
 
 /* This is the Timer2 overflow ISR that is driving the application
  * timers.
- * It is also abused for debouncing the push buttons */
+ * It is abused for debouncing the push buttons */
 ISR(TIMER2_OVF_vect, ISR_NAKED)
 {
 	/* Debounced and inverted key state: bit = 1: key pressed */
@@ -152,7 +152,7 @@ ISR(TIMER2_OVF_vect, ISR_NAKED)
 	Os_TickTimer(TIMER_ID_GAME);
 
 	/* This snippet was ripped from Peter Dannegger's debounce routines.
-	 * It basically counts the number of times the buttons are detected
+	 * It counts the number of times the buttons are detected
 	 * as pressed within a given period of time to filter out mechanical
 	 * bounces */
 

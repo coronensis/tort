@@ -65,7 +65,7 @@
 /* There are seven types of tetrominones. See README.md for details */
 #define TETROMINO_TYPES			7
 
-/* Oriented of a tetromino. Basically the four cardinal directions */
+/* Oriented of a tetromino. The four cardinal directions */
 #define TETROMINO_ORIENTATIONS		4
 
 /* Normal falling speed: One second between advancements on the y coordinate */

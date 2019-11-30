@@ -147,7 +147,7 @@ static Task Tasks[] = {
 		/* The stack grows downwards so point to the end of the
 		 * memory allocated or it. Subtract the size of the context.
 		 * A task will start by restoring its context from there.
-		 * Also when the task is interrupted the context is saved
+		 * When the task is interrupted the context is saved
 		 * to that place */
 		&StackTaskOne[TASK_STACK_SIZE - 36]
         }

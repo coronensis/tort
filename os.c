@@ -178,7 +178,7 @@ void Os_ReleaseResources(uint8_t ResID)
 /*
  * The event is set as given by the mask.
  * Calling SetEvent causes the targeted task to be transferred to the ready state,
- * if it was waiting for the event specified in mask. If it is also of higher
+ * if it was waiting for the event specified in mask. If it is of higher
  * priority than the currently running task the scheduler is set to run ASAP
  * so a timely switch to higher prio task can occur
  */
