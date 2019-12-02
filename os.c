@@ -36,19 +36,19 @@
  * into the first OS task occurs */
 static uint8_t MainContextSP[2];
 
-/* The main context descriptor. Only care about the stack pointer */
+/* The main context descriptor. Only cares about the stack pointer */
 static TaskDescriptor Main = {&MainContextSP[0], 0, 0, 0, 0, 0};
 
 /* Saving the task context will write the old main stack pointer
  * to the above buffer. NULL would mean killing stuff where the
- * reset vector points to */
+ * reset vector points to, if possible (ROM vs RAM) */
 TaskDescriptor volatile *CurrentTask = &Main;
 
 /* Index into the "scheduling table". Indicates the descriptor of the currently
  * running task */
 static volatile uint8_t CurrentTaskIndex = 0;
 
-/* Globally keeps track of which resources are currently occupied. */
+/* Keeps track of which resources are currently occupied. */
 static volatile uint8_t ResourcesOccupied = 0;
 
 /* Timers configured by the application */
@@ -75,7 +75,7 @@ void Os_Scheduler(void)
 	/* Look for a suitable task to run next.
 	 * Criteria: State, Priority, Resources */
 	for (TaskIndex = 0; TaskIndex < NrTasks; TaskIndex++) {
-		/* Task ready and has no resources blocked? */
+		/* Task READY and has no resources blocked? */
 		if ( (Tasks[TaskIndex].State == TASK_STATE_READY)
 		    &&
 		     ((Tasks[TaskIndex].RequiredResources & ResourcesOccupied) == 0)
@@ -87,8 +87,8 @@ void Os_Scheduler(void)
 		}
 	}
 
-	/* If the current task moved into a different state than running
-	 * or if it is running but a task with higher priority has been
+	/* If the current task moved into a different state than RUNNING
+	 * or if it is RUNNING but a task with higher priority has been
 	 * selected to run next, do preempt the current task */
 	if ( (Tasks[CurrentTaskIndex].State == TASK_STATE_READY)
 	    ||
@@ -116,7 +116,7 @@ void Os_TickTimer(uint8_t TimerID)
 {
 	Os_EnterCritical();
 
-	/* Ignore timers that are on 0 */
+	/* Ignore inactive timers */
 	if (Timers[TimerID].Value > 0) {
 
 		Timers[TimerID].Value--;
@@ -170,6 +170,8 @@ void Os_ReleaseResources(uint8_t ResID)
 
 	/* This task freed events that might be required by another
 	 * high priority task in order to run */
+
+	/* FIXME: find out if there are any */
 	Os_ForceSchedule();
 
 	Os_ExitCritical();
@@ -177,7 +179,7 @@ void Os_ReleaseResources(uint8_t ResID)
 
 /*
  * The event is set as given by the mask.
- * Calling SetEvent causes the targeted task to be transferred to the ready state,
+ * Calling SetEvent causes the targeted task to be transferred to the READY state,
  * if it was waiting for the event specified in mask. If it is of higher
  * priority than the currently running task the scheduler is set to run ASAP
  * so a timely switch to higher prio task can occur
@@ -190,11 +192,12 @@ void Os_SetEvent(uint8_t TaskID, uint8_t Mask)
 	Tasks[TaskID].Events |= Mask;
 
 	/* If the task was waiting for this event move it to the READY state */
-	if (Tasks[TaskID].WaitForEvents && Tasks[TaskID].Events) {
+	if (Tasks[TaskID].WaitForEvents & Tasks[TaskID].Events) {
+
 		Tasks[TaskID].State = TASK_STATE_READY;
 
-		/* If the priority of the task is higher than the current task
-		 * trigger scheduling ASAP */
+		/* If the priority of the addressed task is higher than the
+		 * current task trigger scheduling ASAP */
 		if (Tasks[TaskID].Priority > Tasks[CurrentTaskIndex].Priority)
 			Os_ForceSchedule();
 	}
@@ -203,8 +206,8 @@ void Os_SetEvent(uint8_t TaskID, uint8_t Mask)
 }
 
 /*
- * Clear the events specified in mask from the current tasks's events
- * ClearEvents is restricted to task which owns the events.
+ * Clear the events specified in the mask from the current tasks's events.
+ * ClearEvents is restricted to the task which owns the events (CurrentTask).
  */
 inline void Os_ClearEvents(uint8_t Mask)
 {
@@ -217,7 +220,7 @@ inline void Os_ClearEvents(uint8_t Mask)
 
 /*
  * This service returns the current state of all event bits of the currently
- * active task, not the events that the task is waiting for.
+ * active task.
  */
 inline uint8_t Os_GetEvents(void)
 {
@@ -234,15 +237,14 @@ inline uint8_t Os_GetEvents(void)
 
 /*
  * The state of the current task is set to WAITING, unless at least
- * one of the events specified in Mask has already been set.
+ * one of the events specified in Mask have already been set.
  * This call enforces scheduling, if the wait condition occurs.
- * This service shall only be called from the task owning the event.
  */
 void Os_WaitEvents(uint8_t Mask)
 {
 	Os_EnterCritical();
 
-	/* Mark the events waited on as such in the task descriptor */
+	/* Mark the events waited on in the task descriptor */
 	Tasks[CurrentTaskIndex].WaitForEvents |= Mask;
 
 	/* If none of the requested events is already set, wait for one */
@@ -250,7 +252,7 @@ void Os_WaitEvents(uint8_t Mask)
 
 		Tasks[CurrentTaskIndex].State = TASK_STATE_WAITING;
 
-		/* This task goes into waiting so trigger a scheduling
+		/* This task goes into WAITING so trigger a scheduling
 		 * before to avoid wasting CPU cycles and reaction time
 		 */
 		Os_ForceSchedule();
@@ -259,9 +261,10 @@ void Os_WaitEvents(uint8_t Mask)
 
 		/* Task goes to WAITING state until it gets one of the
 		 * events it cares for. It does not really do the busy-waiting
-		 * the for(;;) indicates but just stays there for a few iterations
-		 * until the scheduler runs. After it is scheduled again it
-		 * will exit the loop immediately due to the set event
+		 * the for(;;) indicates, but just stays there for a few iterations
+		 * until the scheduler runs. After that it is scheduled again.
+		 * It will exit the loop immediately due to the set event - when
+		 * it occurs
 		 */
 		for (;;) {
 			if ((Tasks[CurrentTaskIndex].Events & Mask))

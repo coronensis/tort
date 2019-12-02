@@ -37,7 +37,8 @@
  * LCD hardware related configuration items
  *******************************************/
 
-/* Should be understood as pixel on monochrome LCD "on" or "off". */
+/* Should be understood as state of the pix pixel on the monochrome LCD being
+ * "on" or "off". */
 #define COLOR_BLACK			1
 #define COLOR_WHITE			0
 
@@ -56,8 +57,7 @@
 
 /* Tetris game board. I selected 8 x 16 instead of the more common 10 x 20.
  * Rationale: Be able to easily represent the board as a matrix of bits
- * that nicely fits onto byte boundaries and therefore enables usage of
- * bit manipulation to model the game. README.md has the details
+ * that nicely fits on byte boundaries. README.md has the details
  */
 #define BOARD_COLUMNS			8
 #define BOARD_ROWS			16
@@ -65,7 +65,7 @@
 /* There are seven types of tetrominones. See README.md for details */
 #define TETROMINO_TYPES			7
 
-/* Oriented of a tetromino. The four cardinal directions */
+/* Orientations of a tetromino. The four cardinal directions */
 #define TETROMINO_ORIENTATIONS		4
 
 /* Normal falling speed: One second between advancements on the y coordinate */
@@ -83,7 +83,7 @@
 /* Board X center */
 #define POSITION_X_CENTER		((BOARD_COLUMNS - TEROMINO_WIDTH) / 2)
 
-/* Board Y positions min max */
+/* Board Y positions min/max */
 #define POSITION_Y_TOP			0
 #define POSITION_Y_BOTTOM		BOARD_ROWS
 
@@ -133,8 +133,8 @@ typedef struct {
 #define TASK_ID_CTRL            	3
 
 /* Size of the stack for each of the used tasks.
- * Tricky get the value right. Try using canaries at the end of the stack
- * and see if they get killed to find the right size. Without good tools
+ * Tricky to get the value right. Try using canaries at the end of the stack
+ * (and see if they get killed) to find the right size. Without good tools
  * this is more or less a game of educated guessing (context size +
  * local variables + function calls + interrupts + ... ) plus try and error.
  * If you experience bizare, unexplainable behaviour after adding innocently

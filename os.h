@@ -58,7 +58,7 @@ typedef struct {
 	/* Events the task is waiting for. Bit mask */
 	volatile uint8_t WaitForEvents;
 
-	/* Required resources. Bit mask. */
+	/* Configured required resources. Bit mask. */
 	const uint8_t RequiredResources;
 
 	/* Configured priority of the task. */
@@ -92,7 +92,6 @@ extern TaskDescriptor volatile *CurrentTask;
 #define Os_LCDBacklightOff	Uc_LCDBacklightOff
 
 /* Interrupt handling */
-
 #define Os_EnableAllInterrupts	Uc_EnableAllInterrupts
 #define Os_DisableAllInterrupts	Uc_DisableAllInterrupts
 
@@ -121,7 +120,7 @@ extern void Os_SetEvent(uint8_t TaskID, uint8_t Mask);
 /* Clear one or more events of the current task */
 extern void Os_ClearEvents(uint8_t Mask);
 
-/* Get the event set to the current task */
+/* Get the events set to the current task */
 extern uint8_t Os_GetEvents(void);
 
 /* Make the current task wait for one or more events */

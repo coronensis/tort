@@ -41,17 +41,17 @@
 #define LED_RED	      PB1
 #define LED_BACKLIGHT PB2
 
-/* ADC current and last value */
+/* ADC's current value */
 static volatile uint8_t CurentADCValue = 0;
 
-/* Key press detect */
+/* Key press detector */
 static volatile uint8_t KeyPress;
 
 /* Check if one or more keys are pressed */
 static uint8_t KeyPressed(uint8_t Key)
 {
-	Key &= KeyPress;              /* read key(s) */
-	KeyPress ^= Key;              /* clear key(s) */
+	Key &= KeyPress;
+	KeyPress ^= Key;
 
 	return Key;
 }
@@ -71,8 +71,7 @@ ISR(ADC_vect, ISR_NAKED)
 	/* Read result of analog to digital conversion */
 	CurentADCValue = ADCH;
 
-	/* Do not react to any minuscule change in ADC value
-	 * but only to sufficently large value changes */
+	/* Do not react to any minuscule change in ADC value */
 	if ( (CurentADCValue > (LastValue + 10))
 	   ||
 	     (CurentADCValue < (LastValue - 10))
@@ -92,7 +91,7 @@ ISR(ADC_vect, ISR_NAKED)
 		Os_SetEvent(TASK_ID_CTRL, event);
 	}
 
-	/* Restore the context of the newly selected task */
+	/* Restore the context */
         Uc_RestoreContext();
 
 	/* Enable interrupts and return */
@@ -107,11 +106,11 @@ ISR(TIMER1_OVF_vect, ISR_NAKED)
 	Uc_SaveContext();
 
 	/* Reset the timer */
-	/* Another interrupt will occur after 50ms due to timer overflow */
+	/* Another interrupt will occur after ~50ms due to timer overflow */
 	TCNT1H = 0x3C;
 	TCNT1L = 0xB0;
 
-	/* Select a new task as the "CurrentTask" */
+	/* Select a task to run next */
 	Os_Scheduler();
 
 	/* 'rotate' button */
@@ -148,7 +147,7 @@ ISR(TIMER2_OVF_vect, ISR_NAKED)
 	/* Save the context of the current task */
 	Uc_SaveContext();
 
-	/* Tick the (software) application timer(s) */
+	/* Tick the application timer(s) */
 	Os_TickTimer(TIMER_ID_GAME);
 
 	/* This snippet was ripped from Peter Dannegger's debounce routines.
@@ -170,7 +169,7 @@ ISR(TIMER2_OVF_vect, ISR_NAKED)
 	asm volatile("reti");
 }
 
-/* Send a byte over the UART */
+/* Send an uint8_t value over the UART */
 void Uc_UARTSend(uint8_t Data)
 {
 	/* Wait for empty transmit buffer */
@@ -230,23 +229,22 @@ inline void Uc_LCDBacklightOff(void)
 	PORTB &= ~_BV(LED_BACKLIGHT);
 }
 
-/* Initialize all the peripheral components of the microcontroller
- * that are used by this project */
+/* Initialize the needed peripheral components of the microcontroller */
 uint8_t Uc_HardwareInit(void)
 {
 	/* Initialize Ports */
 	DDRB  = 0x07;		/* Port B 0..2 -> output */
-	PORTB = 0xF8;		/* pulls-ups for inputs */
+	PORTB = 0xF8;		/* Pulls-ups for inputs */
 
         DDRC  = 0x37;		/* Port C 6..0 -> output C3 input -> adc */
-	PORTC = 0xC0;		/* enable pull-ups for uppermost 2 bits */
+	PORTC = 0xC0;		/* Enable pull-ups for uppermost 2 bits */
 
 	DDRD  = 0x02;		/* Port D - all inputs except UART TX - pin 1*/
 	PORTD = 0xFC;		/* Enable internal pull-ups for all but RX and TX */
 
 	/* Initialize Timer1 */
 	TCCR1A = 0x00;
-	TCCR1B = 0x02;		/* 8 prescaler. Low latency is important for forcing a task switch
+	TCCR1B = 0x02;		/* 1:8 prescaler. Low latency is important for forcing a task switch
        				 * which is done by advancing the timer	*/
 	TCCR1C = 0x00;
 	TIMSK1 = 0x01;		/* Enable TC1.ovf interrupt */
@@ -255,7 +253,7 @@ uint8_t Uc_HardwareInit(void)
 
 	/* Initialize Timer2 */
 	TCCR2A = 0x00;
-	TCCR2B = 0x05;		/* 32 prescaler */
+	TCCR2B = 0x05;		/* 1:32 prescaler */
 	TIMSK2 = 0x01;
 	TCNT2  = 0x00; 	  	/* Interrupt every 0.004096 seconds  due to overflow) */
 
@@ -268,10 +266,10 @@ uint8_t Uc_HardwareInit(void)
 	/* Initialize ADC */
 	ADMUX = 0x63; 		/* AVCC with external capacitor at AREF pin, align left, chanel 3 */
 
-	/* enable adc, auto trigger, enable interrupt, prescaler = 128 */
+	/* Enable ADC, auto trigger, enable interrupt, prescaler = 128 */
 	ADCSRA = 0xEF;
 
-	/* ADC TIMER1 overflow mode. Free running mode would mean to be interrupted every 200us */
+	/* ADC TIMER1 overflow mode. Free running mode would mean interrupts every 200us */
 	ADCSRB = 0x06;
 	ACSR   = 0x80;		/* Disable analog comp */
 
@@ -280,7 +278,7 @@ uint8_t Uc_HardwareInit(void)
         /* Enable the LCD display (SCE -> LOW) */
         PORTC &= 0xF3;
 
-        /* Reset the display RST LOW -> HIGH transition*/
+        /* Reset the LCD display: RST LOW -> HIGH transition*/
         PORTC &= 0xFD;
         PORTC |= 0x02;
 

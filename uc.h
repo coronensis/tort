@@ -31,11 +31,11 @@
 #ifndef UC_H
 #define UC_H
 
-/* Speed at which the UART communicates in bits/sec */
+/* Speed at which the UART communicates in bits/sec (baud) */
 #define UART_BAUDRATE		57600
 
 /* Number of bytes required to save a context.
- * 32 registers + 1 status byte + 2 bytes stack pointer */
+ * 32 * 1 byte registers + 1 status byte + 2 bytes stack pointer */
 #define SIZE_SAVED_CONTEXT	35
 
 /* Absolute stack size minimum a task can use */
@@ -146,7 +146,7 @@
 #define Uc_DisableAllInterrupts() \
         asm volatile("cli");
 
-/* Opposite of Uc_DisableAllInterrupts() */
+/* Antagonist of Uc_DisableAllInterrupts() */
 #define Uc_EnableAllInterrupts() \
         asm volatile("sei");
 
