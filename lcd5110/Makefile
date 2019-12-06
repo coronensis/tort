@@ -32,9 +32,8 @@ F_CPU = 8000000
 
 # Flags for C files
 CFLAGS += -std=gnu89
-
-CFLAGS += -ffreestanding -Wall -Wextra -Werror -pedantic -Wundef -Wshadow -Wcast-qual \
-	  -Wcast-align -Wstrict-prototypes -Wredundant-decls -Wnested-externs \
+CFLAGS += -ffreestanding -Wall -Wextra -Werror -pedantic -Wundef -Wshadow \
+	  -Wunused-parameter -Warray-bounds -Wstrict-prototypes -Wredundant-decls \
 	  -Wbad-function-cast -Wunreachable-code
 CFLAGS += -gdwarf-2
 CFLAGS += -mmcu=atmega328p
@@ -46,7 +45,9 @@ LIBSRC = PCD8544.c
 
 # The Adafruit LCD library is compiled and linked as a library to
 # comply with the LGPL that governs that code.
-all:
+all: PCD8544.a
+
+PCD8544.a: $(LIBSRC)
 	avr-gcc --version
 	avr-gcc $(CFLAGS) -c $(LIBSRC) -o PCD8544.o
 	avr-ar rcs PCD8544.a PCD8544.o

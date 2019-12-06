@@ -37,7 +37,7 @@
  * LCD hardware related configuration items
  *******************************************/
 
-/* Should be understood as state of the pix pixel on the monochrome LCD being
+/* Should be understood as state of the pixels on the monochrome LCD being
  * "on" or "off". */
 #define COLOR_BLACK			1
 #define COLOR_WHITE			0

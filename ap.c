@@ -430,10 +430,10 @@ static void TaskCtrl(void)
 			Os_ClearEvents(EVENT_DROP);
 		}
 
-		Os_ReleaseResources(RESOURCE_CONTROLS);
-
 		/* Put back the remporarily removed tetromino */
                 AddTetromino(Falling.Type, Falling.Orientation, Falling.Pos_x, Falling.Pos_y);
+
+		Os_ReleaseResources(RESOURCE_CONTROLS);
 
 		/* If any change happened to the falling tetromino trigger the "model" task to
 		 * update the board and subsequently the dispay */
@@ -500,7 +500,7 @@ int main(void)
 	FILE UartDebug = FDEV_SETUP_STREAM(SendChar, NULL, _FDEV_SETUP_WRITE);
 	stdout = stderr = &UartDebug;
 
-	/* Useful to detect involutary restarts */
+	/* Useful to detect involuntary restarts */
 	printf ("SYSTEM STARTUP\n");
 
         Score = 0;

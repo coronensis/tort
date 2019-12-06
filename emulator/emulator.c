@@ -41,7 +41,6 @@
 #include <X11/Xutil.h>
 #include <X11/XKBlib.h>
 
-
 #define COLOR_BLACK			0
 #define COLOR_WHITE			1
 
@@ -56,8 +55,8 @@
 
 /* Tetris game board. I selected 8 x 16 instead of the more common 10 x 20.
  * Rationale: Be able to easily represent the board as a matrix of bits
- * that nicely fits onto byte boundaries and therefore enables usage of
- * bit manipulation to model the game. README.md has the details
+ * that nicely fits onto byte boundaries
+ * README.md has the details
  */
 #define BOARD_COLUMNS			8
 #define BOARD_ROWS			16
@@ -65,7 +64,7 @@
 /* There are seven types of tetrominones. See README.md for details */
 #define TETROMINO_TYPES			7
 
-/* Oriented of a tetromino. The four cardinal directions */
+/* Orientations of a tetromino. The four cardinal directions */
 #define TETROMINO_ORIENTATIONS		4
 
 /* Normal falling speed: One second between advancements on the y coordinate */
@@ -99,7 +98,7 @@
 /* And none are occupied in an empty row */
 #define ROW_EMPTY			0x00
 
-/* Possible tetromino orientation in space */
+/* Possible tetromino orientations in space */
 enum {
          UP
         ,RIGHT
@@ -143,7 +142,7 @@ static const uint8_t Tetrominoes[TETROMINO_TYPES][TETROMINO_ORIENTATIONS][NR_BYT
 };
 
 /* Depending on the tetromino type and orientation the max. x position varies to avoid
- * tetromino sticking out of the board area or performing "rotations" where not sufficient
+ * a tetromino sticking out of the board area or performing "rotations" where not sufficient
  * space is available */
 static const uint8_t Max_Pos_x[TETROMINO_TYPES][TETROMINO_ORIENTATIONS] = {
           {5, 6, 5, 6}
@@ -161,6 +160,8 @@ GC Pen;
 XGCValues Values;
 XEvent Ev;
 
+/* Mutexes and condition variable needed to control access to resources
+ * and signal the view task to run */
 pthread_mutex_t MutexBoard;
 pthread_mutex_t MutexControl;
 pthread_mutex_t MutexDraw;
@@ -193,7 +194,7 @@ static void LCDdrawrect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t colo
 
 }
 
-/* Clear the display */
+/* Clear the LCD display - the X11 window in this case */
 static void LCDclear(void)
 {
 	XClearWindow(Dpy, Ev.xany.window);
@@ -202,7 +203,6 @@ static void LCDclear(void)
 /* Flush the buffer to the display */
 static void LCDdisplay(void)
 {
-	/* XNextEvent() performs an implicit XFlush() before trying to read some events */
 	XFlush(Dpy);
 }
 
@@ -225,11 +225,11 @@ static uint8_t DetectCollision(uint8_t Type, uint8_t Orientation, uint8_t Pos_x,
         uint8_t Line0 = 0, Line1 = 0, Line2 = 0, Line3 = 0;
         uint8_t Detected = 0;
 
-	/* A tetromino is represented as a 4x4 bitmap that has the bits set that represent
+	/* A tetromino is represented as a 4x4 bitmap that has the bits set that make up
 	 * the tetromino. Detecting a collision resumes to checking if there is any bit
 	 * superposition between the tetromino's line and the line of the board.
 	 * Take into account that a tetromino falls line by line starting at 0 so only check
-	 * the lines that are on the boad.
+	 * the lines that are already on the boad.
 	 */
         Line0 = Board[Pos_y] & ((Tetrominoes[Type][Orientation][1] & 0x0F) << Pos_x);
         if (Pos_y > 0)
@@ -326,7 +326,6 @@ static int X11EventLoop (void)
 
 		case KeyRelease:
 
-
 			switch (XkbKeycodeToKeysym(Dpy, Ev.xkey.keycode, 0, Ev.xkey.state & ShiftMask ? 1 : 0)) {
 			case XK_Up: {
 					    uint8_t Orientation = Falling.Orientation;
@@ -383,7 +382,7 @@ static int X11EventLoop (void)
 
 		pthread_mutex_unlock (&MutexControl);
 
-		/* Put back the remporarily removed tetromino */
+		/* Put back the temporarily removed tetromino */
                 AddTetromino(Falling.Type, Falling.Orientation, Falling.Pos_x, Falling.Pos_y);
 	}
 }
@@ -504,10 +503,10 @@ static void *TaskModel(void *arg)
 
 int main(int argc, char ** argv)
 {
-	int screen_num;
-	unsigned long background, border;
-	struct timeval tv;
-	Window win;
+	int ScreenNum;
+	unsigned long Background, Border;
+	struct timeval Tv;
+	Window Win;
 
         pthread_t thTaskView;
         pthread_t thTaskModel;
@@ -524,8 +523,8 @@ int main(int argc, char ** argv)
 	printf ("Mouse wheel 'Down' moves the teromino to the right\n");
 
 	/* Seed the RNG */
-	gettimeofday(&tv, NULL);
-	srand(tv.tv_usec);
+	gettimeofday(&Tv, NULL);
+	srand(Tv.tv_usec);
 
 	Score = 0;
 
@@ -542,36 +541,36 @@ int main(int argc, char ** argv)
 		return EX_SOFTWARE;
 	}
 
-	/* these are macros that pull useful data out of the display object */
+	/* These are macros that pull useful data out of the display object */
 	/* we use these bits of info enough to want them in their own variables */
-	screen_num = DefaultScreen(Dpy);
-	background = WhitePixel(Dpy, screen_num);
-	border = BlackPixel(Dpy, screen_num);
+	ScreenNum = DefaultScreen(Dpy);
+	Background = WhitePixel(Dpy, ScreenNum);
+	Border = BlackPixel(Dpy, ScreenNum);
 
-	win = XCreateSimpleWindow(Dpy, DefaultRootWindow(Dpy), /* display, parent */
+	Win = XCreateSimpleWindow(Dpy, DefaultRootWindow(Dpy), /* display, parent */
 			0,0, /* x, y: the window manager will place the window elsewhere */
 			LCD_WIDTH, LCD_HEIGHT, /* width, height */
-			2, border, /* border width & colour, unless you have a window manager */
-			background); /* background colour */
+			2, Border, /* Border width & colour, unless you have a window manager */
+			Background); /* Background colour */
 
-	/* tell the display server what kind of events we would like to see */
-	XSelectInput(Dpy, win, ButtonPressMask | StructureNotifyMask | ExposureMask | KeyReleaseMask);
+	/* Tell the display server what kind of events we would like to see */
+	XSelectInput(Dpy, Win, ButtonPressMask | StructureNotifyMask | ExposureMask | KeyReleaseMask);
 
-	/* create the pen to draw lines with */
-	Values.foreground = BlackPixel(Dpy, screen_num);
+	/* Create the pen to draw lines with */
+	Values.foreground = BlackPixel(Dpy, ScreenNum);
 	Values.line_width = 1;
 	Values.line_style = LineSolid;
-	Pen = XCreateGC(Dpy, win, GCForeground|GCLineWidth|GCLineStyle,&Values);
+	Pen = XCreateGC(Dpy, Win, GCForeground|GCLineWidth|GCLineStyle,&Values);
 
-	/* okay, put the window on the screen, please */
-	XMapWindow(Dpy, win);
+	/* Put the window on the screen */
+	XMapWindow(Dpy, Win);
 
-	/* initialize mutexes */
+	/* Initialize mutexes */
         pthread_mutex_init(&MutexBoard, NULL);
 	pthread_mutex_init(&MutexControl, NULL);
 	pthread_mutex_init(&MutexDraw, NULL);
 
-	/* initialize condition variable */
+	/* Initialize condition variable */
         pthread_cond_init (&CondDraw, NULL);
 
 	/* Create the view "task" */
@@ -588,9 +587,10 @@ int main(int argc, char ** argv)
 		exit (EX_OSERR);
 	}
 
-	/* Handle X11 events */
+	/* Handle X11 events. Does not return */
 	X11EventLoop();
 
+	/* Never reached */
 	return EX_OK;
 }
 

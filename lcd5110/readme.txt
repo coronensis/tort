@@ -1,7 +1,7 @@
 
 In order to preserve resources on the microcontroller and speed up image
 flashing, the Adafruit library was _heavily_ reduced.
-Only the functionality to draw pixel on the LCD screen was retained.
+Only the functionality to draw pixels on the LCD screen was retained.
 The version used here is rather outdated.
 
 Please find the complete (and up-to-date) library at:

@@ -392,6 +392,8 @@ the board on my kitchen table :)
 
 - Fix the bugs. I fixed those I knew of but I'm sure there are more.
 
+- Error checking. Currently a perfect world is assumed :)
+
 - Add missing features to the OS as need for them comes up
 
 - Maybe do double buffering for the LCD display?

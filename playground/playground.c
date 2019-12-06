@@ -1,7 +1,7 @@
 /*
  * TORT - Toy-grade RTOS with Tetris on top
  *
- * simsched.c: Playground for preemptive scheduling. Uses the AVR simulator.
+ * playground.c: Playground for preemptive scheduling. Uses the AVR simulator.
  *
  * Copyright (c) 2019, Helmut Sipos <helmut.sipos@gmail.com>
  * All rights reserved.
@@ -36,7 +36,7 @@
 #include <util/delay.h>
 
 /* Choose this to be sufficently large to accomodate the context and other
- * stack usages (function calls, recursion, etc.) by the target task */
+ * stack usages (function calls, recursion, interrupts, etc.) by the target task */
 #define TASK_STACK_SIZE 256
 
 /* Arbitraily chosen */
@@ -147,8 +147,7 @@ static Task Tasks[] = {
 		/* The stack grows downwards so point to the end of the
 		 * memory allocated or it. Subtract the size of the context.
 		 * A task will start by restoring its context from there.
-		 * When the task is interrupted the context is saved
-		 * to that place */
+		 */
 		&StackTaskOne[TASK_STACK_SIZE - 36]
         }
         ,{
@@ -161,7 +160,7 @@ static Task Tasks[] = {
 /* Will contain the stack pointer of the main context */
 uint8_t MainContextSP[2];
 
-/* The main context descriptor. Only care about the stack pointer */
+/* The main() context descriptor. Only care about the stack pointer */
 Task Main = {&MainContextSP[0]};
 
 /* Saving the task context will write the current main context's stack pointer
@@ -179,9 +178,9 @@ void TaskOne (void)
 
 		delay = rand() / (RAND_MAX / DELAY_MAX_MS + 1);
 
-		/* BEWARE of the delay stuff in preemptive systems. They
+		/* BEWARE of the __delay() stuff in preemptive systems. It
 		 * measure time by counting CPU cycles. This only works
-		 * when the task is not interrupted. Here wo do not care
+		 * if the task is not interrupted. Here we do not care
 		 * about he actual time spent but just want to give the
 		 * task something to do */
 		_delay_ms(delay);
@@ -218,12 +217,12 @@ ISR(TIMER1_OVF_vect, ISR_NAKED)
 
 	UC_RestoreContext();
 
-	/* Enable interrupts and return into the new task */
+	/* Enable interrupts and return into the selected task */
 	asm volatile ( "reti" );
 }
 
 /* Helper function for directing the stdout file descriptor to the UART
- * this enables using functions like PRINTF(3) */
+ * this enables using library functions like PRINTF(3) */
 static int SendChar(char c, FILE *stream)
 {
         (void)stream;
@@ -248,26 +247,24 @@ int main (int argc, char **argv)
         FILE UartDebug = FDEV_SETUP_STREAM(SendChar, NULL, _FDEV_SETUP_WRITE);
         stdout = stderr = &UartDebug;
 
-	/* Pacify the compiler about unused variables */
+	/* Pacify the compiler about unused parameters */
 	(void)argc;
 	(void)argv;
 
 	/* Usefull when unexpected "resets" happen */
         printf("SYSTEM STARTUP\n");
 
-	/* Play with this initialization values to find issues */
+	/* Play with the initialization value to find issues */
 	memset(StackTaskOne, 0x00, TASK_STACK_SIZE);
 	memset(StackTaskTwo, 0x00, TASK_STACK_SIZE);
 
-        /* Address of the code where the task enters */
+        /* Address of the code where the tasks enter */
         StackTaskOne[TASK_STACK_SIZE - 1] = (uint8_t)((uint16_t)TaskOne);
         StackTaskOne[TASK_STACK_SIZE - 2] = (uint8_t)((uint16_t)TaskOne >> 8);
-
-        /* Address of the code where the task enters */
         StackTaskTwo[TASK_STACK_SIZE - 1] = (uint8_t)((uint16_t)TaskTwo);
         StackTaskTwo[TASK_STACK_SIZE - 2] = (uint8_t)((uint16_t)TaskTwo >> 8);
 
-	/* Set up the system timer */
+	/* Set up timer1 of the microcontroller */
         TCCR1A = 0x0;
         TCCR1B = 0x1;		/*  1:1 (NO) prescaler */
         TCCR1C = 0x0;
@@ -282,7 +279,8 @@ int main (int argc, char **argv)
 	for (;;) {
 	}
 
-	/* Quiet the compiler */
+	/* Will never be reached. Make the compiler happy by
+	 * returning a value to match the function definition */
 	return 0;
 }
 

@@ -1,5 +1,5 @@
 #
-# simsched - Toy-grade RTOS with Tetris on top
+# playground - Toy-grade RTOS with Tetris on top
 #
 # Makefile: MAKE(1) control file to build the scheduling playground application
 #           to be run in the AVR simulator
@@ -23,7 +23,7 @@
 # ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 # (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 # LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR simsched
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR playground
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
@@ -33,50 +33,49 @@ F_CPU = 8000000
 
 # Flags for C files
 CFLAGS += -std=gnu89
-
-CFLAGS += -ffreestanding -Wall -Wextra -Werror -pedantic -Wundef -Wshadow -Wcast-qual \
-          -Wcast-align -Wstrict-prototypes -Wredundant-decls -Wnested-externs \
-          -Wbad-function-cast -Wunreachable-code
+CFLAGS += -ffreestanding -Wall -Wextra -Werror -pedantic -Wundef -Wshadow \
+	  -Wunused-parameter -Warray-bounds -Wstrict-prototypes -Wredundant-decls \
+	  -Wbad-function-cast -Wunreachable-code
 CFLAGS += -gdwarf-2
 CFLAGS += -mmcu=atmega328
 CFLAGS += -Os -mcall-prologues
 CFLAGS += -DF_CPU=$(F_CPU)
 
 # Linker flags
-LDFLAGS += -Wl,-Map,simsched.map
+LDFLAGS += -Wl,-Map,playground.map
 
 # Source code files
-CSRC = simsched.c
+CSRC = playground.c
 
 # Default target
-all: clean build
+all: playground.elf
 
 # Compile the source code
-build: $(CSRC)
+playground.elf: $(CSRC)
 	avr-gcc --version
-	avr-gcc $(CFLAGS) $(CSRC) -o simsched.elf
-	avr-objcopy -j .text -j .data -j .eeprom -j .fuse -O ihex simsched.elf simsched.hex
-	avr-objcopy -j .text -j .data -O binary simsched.elf simsched.bin
-	avr-objdump -h -S -C simsched.elf > simsched.lst
-	avr-nm -n simsched.elf > simsched.sym
-	avr-size -C --mcu=atmega328 simsched.elf
+	avr-gcc $(CFLAGS) $(CSRC) -o playground.elf
+	avr-objcopy -j .text -j .data -j .eeprom -j .fuse -O ihex playground.elf playground.hex
+	avr-objcopy -j .text -j .data -O binary playground.elf playground.bin
+	avr-objdump -h -S -C playground.elf > playground.lst
+	avr-nm -n playground.elf > playground.sym
+	avr-size -C --mcu=atmega328 playground.elf
 
 # Address of the memory mapped UART data register
 PORT_UART = 0xC6
 
 # Run on the avr simulator
-sim: clean build
-	simulavr -d atmega328 -s -F $(F_CPU) -f simsched.elf -W $(PORT_UART),- -T exit
+sim: playground.elf
+	simulavr -d atmega328 -s -F $(F_CPU) -f playground.elf -W $(PORT_UART),- -T exit
 
 # Run on the avr simulator and produce an execution trace file
-trace:
-	simulavr -d atmega328 -s -F $(F_CPU) -f simsched.elf -t trace.txt -W $(PORT_UART),- -T exit
+trace: playground.elf
+	simulavr -d atmega328 -s -F $(F_CPU) -f playground.elf -t trace.txt -W $(PORT_UART),- -T exit
 
 # Run on the avr simulator and wait for avr-gdb to connect
-gdb:
-	simulavr -d atmega328 -g -F $(F_CPU) -s -f simsched.elf
+gdb: playground.elf
+	simulavr -d atmega328 -g -F $(F_CPU) -s -f playground.elf
 
 # Remove build artefacts
 clean:
-	rm -f *.o *.a *.elf *.hex *.bin *.lst *.sym trace*.txt
+	rm -f  *.elf *.hex *.bin *.lst *.sym trace*.txt
 

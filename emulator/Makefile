@@ -27,11 +27,13 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-CFLAGS=--std=gnu89 -pedantic -Wall -Wextra -ggdb -Og \
+CFLAGS=--std=gnu89 -pedantic -Wall -Wextra -Werror -ggdb -Og -Wundef \
 	-Wunused-parameter -Warray-bounds -Wdeclaration-after-statement \
-	-Wshadow -Wstrict-prototypes -Wredundant-decls -Wunreachable-code
+	-Wshadow -Wbad-function-cast -Wstrict-prototypes -Wredundant-decls -Wunreachable-code
 
-all: emulator.c
+all: emulator
+
+emulator: emulator.c
 	gcc $(CFLAGS) emulator.c -o emulator -lX11 -lpthread
 
 clean:

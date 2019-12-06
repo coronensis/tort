@@ -14,7 +14,8 @@ Simulation options:
 -----------------------------------------------------------------
 2.) Record a trace of the program execution to the file trace.txt
 -----------------------------------------------------------------
-Note that the trace file gets HUGE _really fast_. So make sure
+
+Be aware that the trace file gets HUGE _really fast_. So make sure
 you have enough disk space or stop the simulation in time
 
 # make trace
@@ -32,7 +33,7 @@ In another terminal start avr-gdb
 In GDB you can use the following commands to connect to the simulator
 and set a breakpoint on the main function
 
-file simu.elf
+file plaground.elf
 target remote localhost:1212
 load
 b main

@@ -171,7 +171,7 @@ void Os_ReleaseResources(uint8_t ResID)
 	/* This task freed events that might be required by another
 	 * high priority task in order to run */
 
-	/* FIXME: find out if there are any */
+	/* FIXME: Find out if there are any blocked higher prio tasks */
 	Os_ForceSchedule();
 
 	Os_ExitCritical();

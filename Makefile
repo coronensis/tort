@@ -33,8 +33,8 @@ F_CPU = 8000000
 
 # Flags for C files
 CFLAGS += -std=gnu89
-CFLAGS += -ffreestanding -Wall -Wextra -Werror -pedantic -Wundef -Wshadow -Wcast-qual \
-	  -Wcast-align -Wstrict-prototypes -Wredundant-decls -Wnested-externs \
+CFLAGS += -ffreestanding -Wall -Wextra -Werror -pedantic -Wundef -Wshadow \
+	  -Wunused-parameter -Warray-bounds -Wstrict-prototypes -Wredundant-decls \
 	  -Wbad-function-cast -Wunreachable-code
 CFLAGS += -gdwarf-2
 CFLAGS += -mmcu=atmega328p
@@ -49,13 +49,13 @@ LDFLAGS += -Wl,-Map,tort.map
 CSRC = uc.c os.c ap.c
 
 # Default target
-all: build
+all: tort.hex
 
 # Compile the operating system, microcontroller layer, services and
 # application into the image to be used for flashing.
 # The Adafruit LCD library is compiled and linked as a library to
 # comply with the LGPL that governs that code.
-build: $(CSRC)
+tort.hex: $(CSRC) lcd5110/PCD8544.c
 	cd lcd5110 && $(MAKE)
 	avr-gcc --version
 	avr-gcc $(CFLAGS) $(CSRC) lcd5110/PCD8544.a -o tort.elf
@@ -70,8 +70,9 @@ clean:
 	cd lcd5110 && $(MAKE) clean
 	rm -f *.o *.a *.elf *.hex *.bin *.lst *.sym trace*.txt
 
+# NOTE: The following gpio stuff only applies when running on a Raspberry Pi
+
 # Download the firmware to the microcontroller
-# ('gpio' stuff only applies when running on a Raspberry PI)
 install: tort.hex
 	gpio -g mode 26 out
 	gpio -g write 26 0
@@ -79,7 +80,6 @@ install: tort.hex
 	gpio -g write 26 1
 
 # Read the fuse bits of the microcontroller
-# ('gpio' stuff only applies when running on a Raspberry PI)
 rdfuse:
 	gpio -g mode 26 out
 	gpio -g write 26 0
@@ -87,14 +87,13 @@ rdfuse:
 	gpio -g write 26 1
 
 # Write the fuse bits of the microcontroller
-# ('gpio' stuff only applies when running on a Raspberry PI)
 wrfuse:
 	gpio -g mode 26 out
 	gpio -g write 26 0
 	avrdude -p m328p -P /dev/spidev0.0 -c linuxspi -b 10000 -U lfuse:w:0xE2:m -U hfuse:w:0xDD:m -U efuse:w:0xFF:m
 	gpio -g write 26 1
 
-# HW reset the microcontroller (on the Raspberry PI)
+# HW reset the microcontroller
 reset:
 	gpio -g write 26 0
 	sleep 1
