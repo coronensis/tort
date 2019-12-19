@@ -1,5 +1,5 @@
 /*
- * TORT - Toy-grade RTOS with Tetris on top
+ * ToRT - Tetris device with toy-grade OSEK/VDX-inspired RTOS
  *
  * playground.c: Playground for preemptive scheduling. Uses the AVR simulator.
  *

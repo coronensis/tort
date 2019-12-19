@@ -1,5 +1,5 @@
 #
-# ToRT - Toy-grade OSEK/VXD-inspired RTOS
+# ToRT - Tetris device with toy-grade OSEK/VDX-inspired RTOS
 #
 # Makefile: MAKE(1) control file to build the emulator
 #

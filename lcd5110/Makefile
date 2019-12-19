@@ -1,5 +1,5 @@
 #
-# TORT - Toy-grade RTOS with Tetris on top
+# ToRT - Tetris device with toy-grade OSEK/VDX-inspired RTOS
 #
 # Makefile: MAKE(1) control file to build the Adafruit LCD library
 #

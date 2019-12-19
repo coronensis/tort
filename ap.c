@@ -1,5 +1,5 @@
 /*
- * ToRT - Toy-grade OSEK/VXD-inspired RTOS
+ * ToRT - Tetris device with toy-grade OSEK/VDX-inspired RTOS
  *
  * ap.c: Demo application: A simple Tetris clone
  *

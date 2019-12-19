@@ -1,10 +1,10 @@
-# ToRT - Toy-grade OSEK/VXD-inspired RTOS
+# ToRT - Tetris device with toy-grade OSEK/VDX-inspired RTOS
 
 ## Overview
 
 This project started out with the intention to implement a simple RTOS
-based on OSEK/VXD for the ATmega328P to be run in a simulator. It ended
-up with a hardware device being able to play Tetris: The "**Tetris Machine**".
+based on OSEK/VDX for the ATmega328P to be run in a simulator. It ended
+up with a hardware device being able to play Tetris: The "**Tetris Device**".
 An RTOS was implemented, although very different from what was
 originally intended :)
 
@@ -50,9 +50,9 @@ implementation that no one needs or wants :)
 
 ## Hardware
 
-![Tetris Machine Schematic](tetris_machine.png)
+![Tetris Device Schematic](tetris_device.png)
 
-The "Tetris Machine" is a simple device consisting of:
+The "Tetris Device" is a simple device consisting of:
 
 ```
 1 x Atmel (Microchip) ATmega328P microcontroller - PDIP package
@@ -110,7 +110,7 @@ will not go into too much details.
 
 Some general information:
 
-- Inspired by OSEK/VXD and at first aimed at an ECC1 conformance class compatible
+- Inspired by OSEK/VDX and at first aimed at an ECC1 conformance class compatible
 implementation. Abandoned that in favor of a "enough for what I need right now"
 approach.
 
@@ -384,7 +384,7 @@ in this environment than directly on the microcontroller.
 
 ## Demonstration Video
 
-Take a look at the file "tetris_machine.mov" which shows the device in action.
+Take a look at the file "tetris_device.mov" which shows the device in action.
 Sorry for the quality. It clip was shot standing, without a tripod and having
 the board on my kitchen table :)
 

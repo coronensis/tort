@@ -1,7 +1,7 @@
 /*
- * ToRT - Toy-grade OSEK/VXD-inspired RTOS
+ * ToRT - Tetris device with toy-grade OSEK/VDX-inspired RTOS
  *
- * emulator.c: Linux emulator for the "Tetris Machine"
+ * emulator.c: Linux emulator for the "Tetris Device"
  *
  * Copyright (c) 2019, Helmut Sipos <helmut.sipos@gmail.com>
  * All rights reserved.
