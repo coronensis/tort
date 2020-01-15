@@ -1,4 +1,4 @@
-# ToRT - Tetris device with toy-grade OSEK/VDX-inspired RTOS
+# ToRT - Tetris device with toy-grade OSEK-inspired RTOS
 
 ## Overview
 
